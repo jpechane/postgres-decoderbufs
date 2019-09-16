@@ -452,8 +452,8 @@ static void tuple_to_tuple_msg(Decoderbufs__DatumMessage **tmsg,
       } else if (!typisvarlena) {
         set_datum_value(&datum_msg, attr->atttypid, typoutput, origval);
       } else {
-        Datum val = PointerGetDatum(PG_DETOAST_DATUM(origval));
-        set_datum_value(&datum_msg, attr->atttypid, typoutput, val);
+        datum_msg.datum_missing = true;
+        datum_msg.datum_case = DECODERBUFS__DATUM_MESSAGE__DATUM_DATUM_MISSING;
       }
     } else {
       elog(DEBUG1, "column %s is null, ignoring value", attrName);
