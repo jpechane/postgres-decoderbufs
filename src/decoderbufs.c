@@ -261,9 +261,7 @@ static void set_datum_value(Decoderbufs__DatumMessage *datum_msg, Oid typid,
   const char *output = NULL;
   Point *p = NULL;
   Timestamp ts;
-  double duration;
   TimeTzADT *timetz = NULL;
-  Interval   *interval = NULL;
   Decoderbufs__Point dp = DECODERBUFS__POINT__INIT;
 
   int size = 0;
@@ -308,6 +306,7 @@ static void set_datum_value(Decoderbufs__DatumMessage *datum_msg, Oid typid,
     case BITOID:
     case VARBITOID:
     case UUIDOID:
+    case INTERVALOID:
       output = OidOutputFunctionCall(typoutput, datum);
       datum_msg->datum_string = pnstrdup(output, strlen(output));
       datum_msg->datum_case = DECODERBUFS__DATUM_MESSAGE__DATUM_DATUM_STRING;
@@ -345,15 +344,6 @@ static void set_datum_value(Decoderbufs__DatumMessage *datum_msg, Oid typid,
       timetz = DatumGetTimeTzADTP(datum);
       /* use GMT-equivalent time */
       datum_msg->datum_double = (double) (timetz->time + (timetz->zone * 1000000.0));
-      datum_msg->datum_case = DECODERBUFS__DATUM_MESSAGE__DATUM_DATUM_DOUBLE;
-      break;
-    case INTERVALOID:
-      interval = DatumGetIntervalP(datum);
-      /*
-        Convert the month part of Interval to days using assumed average month length of 365.25/12.0 days.
-      */
-      duration = interval->time + interval->day * (double) USECS_PER_DAY + interval->month * ((DAYS_PER_YEAR / (double) MONTHS_PER_YEAR) * USECS_PER_DAY);
-      datum_msg->datum_double = duration;
       datum_msg->datum_case = DECODERBUFS__DATUM_MESSAGE__DATUM_DATUM_DOUBLE;
       break;
     case BYTEAOID:
