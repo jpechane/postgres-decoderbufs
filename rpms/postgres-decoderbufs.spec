@@ -1,5 +1,5 @@
 Name:		postgres-decoderbufs
-Version:	0.9.5
+Version:	0.10.0
 Release:	1%{?dist}
 Summary:	PostgreSQL Protocol Buffers logical decoder plugin
 
@@ -43,5 +43,6 @@ A PostgreSQL logical decoder output plugin to deliver data as Protocol Buffers m
 
 
 %changelog
+* Wed Oct 9 2019 - Jiri Pechanec <jpechane@redhat.com> 0.10.0-1
 * Tue May 14 2019 - Jiri Pechanec <jpechane@redhat.com> 0.9.5-1
 - Initial RPM packaging
