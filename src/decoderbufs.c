@@ -164,16 +164,6 @@ static void pg_decode_shutdown(LogicalDecodingContext *ctx) {
   MemoryContextDelete(data->context);
 }
 
-/* BEGIN callback */
-static void pg_decode_begin_txn(LogicalDecodingContext *ctx,
-                                ReorderBufferTXN *txn) {
-}
-
-/* COMMIT callback */
-static void pg_decode_commit_txn(LogicalDecodingContext *ctx,
-                                 ReorderBufferTXN *txn, XLogRecPtr commit_lsn) {
-}
-
 /* print tuple datums (only used for debug-mode) */
 static void print_tuple_datums(StringInfo out, Decoderbufs__DatumMessage **tup,
                                size_t n) {
@@ -489,6 +479,82 @@ static void add_metadata_to_msg(Decoderbufs__TypeInfo **tmsg,
 
     valid_attr_cnt++;
   }
+}
+
+/* BEGIN callback */
+static void pg_decode_begin_txn(LogicalDecodingContext *ctx,
+                                ReorderBufferTXN *txn) {
+
+  DecoderData *data;
+  MemoryContext old;
+  Decoderbufs__RowMessage rmsg = DECODERBUFS__ROW_MESSAGE__INIT;
+  elog(DEBUG1, "Entering begin callback");
+
+
+  /* Avoid leaking memory by using and resetting our own context */
+  data = ctx->output_plugin_private;
+  old = MemoryContextSwitchTo(data->context);
+
+  rmsg.op = DECODERBUFS__OP__BEGIN;
+  rmsg.has_op = true;
+  rmsg.transaction_id = txn->xid;
+  rmsg.has_transaction_id = true;
+  rmsg.commit_time = TIMESTAMPTZ_TO_USEC_SINCE_EPOCH(txn->commit_time);
+  rmsg.has_commit_time = true;
+
+  /* write msg */
+  OutputPluginPrepareWrite(ctx, true);
+  if (data->debug_mode) {
+    print_row_msg(ctx->out, &rmsg);
+  } else {
+    size_t psize = decoderbufs__row_message__get_packed_size(&rmsg);
+    void *packed = palloc(psize);
+    size_t ssize = decoderbufs__row_message__pack(&rmsg, packed);
+    appendBinaryStringInfo(ctx->out, packed, ssize);
+  }
+  OutputPluginWrite(ctx, true);
+
+  /* Cleanup, freeing memory */
+  MemoryContextSwitchTo(old);
+  MemoryContextReset(data->context);
+}
+
+/* COMMIT callback */
+static void pg_decode_commit_txn(LogicalDecodingContext *ctx,
+                                 ReorderBufferTXN *txn, XLogRecPtr commit_lsn) {
+
+  DecoderData *data;
+  MemoryContext old;
+  Decoderbufs__RowMessage rmsg = DECODERBUFS__ROW_MESSAGE__INIT;
+  elog(DEBUG1, "Entering commit callback");
+
+
+  /* Avoid leaking memory by using and resetting our own context */
+  data = ctx->output_plugin_private;
+  old = MemoryContextSwitchTo(data->context);
+
+  rmsg.op = DECODERBUFS__OP__COMMIT;
+  rmsg.has_op = true;
+  rmsg.transaction_id = txn->xid;
+  rmsg.has_transaction_id = true;
+  rmsg.commit_time = TIMESTAMPTZ_TO_USEC_SINCE_EPOCH(txn->commit_time);
+  rmsg.has_commit_time = true;
+
+  /* write msg */
+  OutputPluginPrepareWrite(ctx, true);
+  if (data->debug_mode) {
+    print_row_msg(ctx->out, &rmsg);
+  } else {
+    size_t psize = decoderbufs__row_message__get_packed_size(&rmsg);
+    void *packed = palloc(psize);
+    size_t ssize = decoderbufs__row_message__pack(&rmsg, packed);
+    appendBinaryStringInfo(ctx->out, packed, ssize);
+  }
+  OutputPluginWrite(ctx, true);
+
+  /* Cleanup, freeing memory */
+  MemoryContextSwitchTo(old);
+  MemoryContextReset(data->context);
 }
 
 /* callback for individual changed tuples */
