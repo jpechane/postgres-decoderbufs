@@ -565,17 +565,21 @@ const ProtobufCMessageDescriptor decoderbufs__row_message__descriptor =
   (ProtobufCMessageInit) decoderbufs__row_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue decoderbufs__op__enum_values_by_number[3] =
+static const ProtobufCEnumValue decoderbufs__op__enum_values_by_number[5] =
 {
   { "INSERT", "DECODERBUFS__OP__INSERT", 0 },
   { "UPDATE", "DECODERBUFS__OP__UPDATE", 1 },
   { "DELETE", "DECODERBUFS__OP__DELETE", 2 },
+  { "BEGIN", "DECODERBUFS__OP__BEGIN", 3 },
+  { "COMMIT", "DECODERBUFS__OP__COMMIT", 4 },
 };
 static const ProtobufCIntRange decoderbufs__op__value_ranges[] = {
-{0, 0},{0, 3}
+{0, 0},{0, 5}
 };
-static const ProtobufCEnumValueIndex decoderbufs__op__enum_values_by_name[3] =
+static const ProtobufCEnumValueIndex decoderbufs__op__enum_values_by_name[5] =
 {
+  { "BEGIN", 3 },
+  { "COMMIT", 4 },
   { "DELETE", 2 },
   { "INSERT", 0 },
   { "UPDATE", 1 },
@@ -587,9 +591,9 @@ const ProtobufCEnumDescriptor decoderbufs__op__descriptor =
   "Op",
   "Decoderbufs__Op",
   "decoderbufs",
-  3,
+  5,
   decoderbufs__op__enum_values_by_number,
-  3,
+  5,
   decoderbufs__op__enum_values_by_name,
   1,
   decoderbufs__op__value_ranges,

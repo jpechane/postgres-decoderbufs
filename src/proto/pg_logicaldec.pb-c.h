@@ -26,7 +26,9 @@ typedef struct _Decoderbufs__RowMessage Decoderbufs__RowMessage;
 typedef enum _Decoderbufs__Op {
   DECODERBUFS__OP__INSERT = 0,
   DECODERBUFS__OP__UPDATE = 1,
-  DECODERBUFS__OP__DELETE = 2
+  DECODERBUFS__OP__DELETE = 2,
+  DECODERBUFS__OP__BEGIN = 3,
+  DECODERBUFS__OP__COMMIT = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(DECODERBUFS__OP)
 } Decoderbufs__Op;
 
