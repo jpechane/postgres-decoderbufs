@@ -24,6 +24,7 @@ typedef struct _Decoderbufs__RowMessage Decoderbufs__RowMessage;
 /* --- enums --- */
 
 typedef enum _Decoderbufs__Op {
+  DECODERBUFS__OP__UNKNOWN = -1,
   DECODERBUFS__OP__INSERT = 0,
   DECODERBUFS__OP__UPDATE = 1,
   DECODERBUFS__OP__DELETE = 2,
